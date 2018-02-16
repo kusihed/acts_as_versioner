@@ -31,25 +31,26 @@ This gem expects a current_user to be present (devise, authlogic etc). In order 
 app/controllers/application_controller
 ---
 
-around_action :setcurrentuser, :except => [:sign_in]
+    around_action :setcurrentuser, :except => [:sign_in]
+
 ....
 
 protected
 
-def setcurrentuser
-  User.current_user = current_user.nil? ? nil : User.find(current_user.id)
-  yield
-ensure
-  User.current_user = nil
-end
+    def setcurrentuser
+		User.current_user = current_user.nil? ? nil : User.find(current_user.id)
+		yield
+	ensure
+		User.current_user = nil
+	end	
 
 app/models/user.rb
 ---
 
-def self.current_user
-  Thread.current[:current_user]
-end
-
-def self.current_user=(usr)
-  Thread.current[:current_user] = usr
-end
+    def self.current_user
+		Thread.current[:current_user]
+	end	
+	
+    def self.current_user=(usr)
+		Thread.current[:current_user] = usr
+	end
