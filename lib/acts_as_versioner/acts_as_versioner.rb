@@ -171,7 +171,7 @@ module ActiveRecord
 	        @acts_as_versioner_model = self.dup
           @acts_as_versioner_model.updated_at = Time.now
 
-	        if mode == 0 && self.id != nil then @acts_as_versioner_mode = 1  end
+	        if mode == 0 && self.id != nil then @acts_as_versioner_mode = 1 end  
 	      end
 
         # In this method the versioning is happening. It expects a copy of the current object in the variable @acts_as_versioner_mode.
