@@ -9,12 +9,9 @@ module ActiveRecord::Acts::Versioner
     :default_versiond_updated_by => 'updated_by'
   }
   mattr_reader :configurator
-end  
-
-ActiveRecord::Base.class_eval do
-  include ActiveRecord::Acts::Versioner
 end
 
 class ActiveRecord::Base
+  include ActiveRecord::Acts::Versioner
   include Userstamp
 end
