@@ -1,8 +1,5 @@
 require File.dirname(__FILE__) + 'acts_as_versioner.rb'
-ActiveRecord::Base.class_eval do
-  include ActiveRecord::Acts::Versioner
-end
-
+require File.dirname(__FILE__) + 'userstamp.rb'
 module ActiveRecord::Acts::Versioner
   @@configurator = {
     :default_versioned_class_name => '_versions',
@@ -13,7 +10,10 @@ module ActiveRecord::Acts::Versioner
   }
 end  
 
-require File.dirname(__FILE__) + 'userstamp.rb'
+ActiveRecord::Base.class_eval do
+  include ActiveRecord::Acts::Versioner
+end
+
 class ActiveRecord::Base
   include Userstamp
 end
