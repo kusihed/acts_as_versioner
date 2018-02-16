@@ -15,9 +15,9 @@ Gem::Specification.new do |s|
     "README.md",
     "Rakefile",
     "VERSION",
+    "lib/acts_as_versioner/acts_as_versioner.rb",
+    "lib/acts_as_versioner/userstamp.rb",
     "lib/acts_as_versioner.rb",
-    "lib/userstamp.rb",
-    "lib/init.rb",
     "acts_as_versioner.gemspec"
   ]
   s.homepage = "http://github.com/kusihed/acts_as_versioner"
