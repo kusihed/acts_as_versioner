@@ -8,6 +8,7 @@ module ActiveRecord::Acts::Versioner
     :default_versiond_created_by => 'created_by',
     :default_versiond_updated_by => 'updated_by'
   }
+  mattr_reader :configurator
 end  
 
 ActiveRecord::Base.class_eval do
