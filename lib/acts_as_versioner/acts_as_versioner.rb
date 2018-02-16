@@ -5,15 +5,15 @@
 # ActsAsVersioner
 
 module ActiveRecord
-	module Acts
-	  module Versioner
+   module Acts
+     module Versioner
 
       def self.included(mod)
-	      mod.extend(ClassMethods)
-	    end
+        mod.extend(ClassMethods)
+      end
 
-	    module ClassMethods
-	      def acts_as_versioner(options = {}, &extension)
+      module ClassMethods
+        def acts_as_versioner(options = {}, &extension)
           include ActiveRecord::Acts::Versioner::InstanceMethods
 
           # don't allow multiple calls
@@ -234,7 +234,6 @@ module ActiveRecord
             # clone the original table in order to create the versions table
             puts versioned_table_name
             not_versioned =  %w{id}
-            updated_col = nil
             self.versioned_columns.each do |col|
               unless not_versioned.include?(col.name)
                     self.connection.add_column versioned_table_name, col.name, col.type,
