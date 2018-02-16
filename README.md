@@ -26,7 +26,7 @@ This gem expands a model class, marked with keyword "acts_as_versioner", with fo
 Userstamp
 =========
 
-This gem expects a current_user to be present (devise, authlogic etc). In order to be able to access to current_user in models and modules, necessary method in application_controller and user.rb have to be available. If there is no current_user Userstamp will set 0 as version editor...
+This module expects a current_user to be present (devise, authlogic etc). In order to be able to access to current_user in models and modules, necessary methods in application_controller and user.rb have to be available. If there is no current_user Userstamp will set 0 as version editor...
 
 app/controllers/application_controller
 ---
