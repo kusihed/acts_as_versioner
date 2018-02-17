@@ -2,7 +2,7 @@ module Userstamp
   extend ActiveSupport::Concern
 
   included do
-    # It's important to use before_save here because of the hierarchy in callbacks (see acts_as_versionable)
+    # It's important to use before_save here because of the hierarchy in callbacks (see acts_as_versioner)
     before_save :set_stamps
   end
   

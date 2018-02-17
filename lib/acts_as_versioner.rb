@@ -12,6 +12,9 @@ module ActiveRecord::Acts::Versioner
 end
 
 class ActiveRecord::Base
-  include ActiveRecord::Acts::Versioner
   include Userstamp
+end
+
+ActiveRecord::Base.class_eval do
+  include ActiveRecord::Acts::Versioner
 end
