@@ -5,8 +5,8 @@
 # ActsAsVersioner
 
 module ActiveRecord
-   module Acts
-     module Versioner
+  module Acts
+    module Versioner
 
       def self.included(mod)
         mod.extend(ClassMethods)
@@ -54,63 +54,63 @@ module ActiveRecord
           versioned_class.table_name = "#{versioned_table_name}"
           versioned_class.belongs_to self.to_s.demodulize.underscore.to_sym, :class_name  => "#{self.to_s}::#{versioned_class_name}",  :foreign_key => versioned_foreign_key
           versioned_class.send :include, options[:extend] if options[:extend].is_a?(Module)
-	      end
-	    end
+        end
+      end
 
-	    module InstanceMethods
-	      attr_accessor :acts_as_versioner_model
-	      attr_accessor :acts_as_versioner_mode
+	  module InstanceMethods
+	    attr_accessor :acts_as_versioner_model
+	    attr_accessor :acts_as_versioner_mode
 
         # Returns the current version.
-	      def get_current_version
+	    def get_current_version
           instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} desc, id desc").first
-	      end
+	    end
 
         # Returns all versions of a model.
-	      def get_versions
+	    def get_versions
           instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, id asc").all
-	      end
+	    end
 
         # This methods returns all versions of associated tables (table that belong to the existing model).
-	      def get_versions_children
-	        associations = Hash.new # result hash
-	        stack = Array.new # Stack of the same algorithm.
+	    def get_versions_children
+	      associations = Hash.new # result hash
+	      stack = Array.new # Stack of the same algorithm.
 
           # Initiate algorithm with the used model
-	        versions = instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at]} asc").all
-	        associations[self.versioned_class_name] = versions # Caching itself in the result hash
-	        stack.push self.class => versions # Setting itself onto the stack
+	      versions = instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at]} asc").all
+	      associations[self.versioned_class_name] = versions # Caching itself in the result hash
+	      stack.push self.class => versions # Setting itself onto the stack
 
           # Main loop of the algorith
-	        while class_struct = stack.pop
-	          class_name = nil
-	          data_set = nil
+	      while class_struct = stack.pop
+	        class_name = nil
+	        data_set = nil
 
-	          class_struct.each do |key_class_name, value_data_set|
-	            class_name = key_class_name
-	            data_set = value_data_set
-	          end
+	        class_struct.each do |key_class_name, value_data_set|
+	          class_name = key_class_name
+	          data_set = value_data_set
+	        end
 
             # Read all assocations
-	          reflection_assoc = Array.new
-	          reflection_assoc.concat(class_name.reflect_on_all_associations(:has_one))
-	          reflection_assoc.concat(class_name.reflect_on_all_associations(:has_many))
-	          reflection_assoc.compact!
+	        reflection_assoc = Array.new
+	        reflection_assoc.concat(class_name.reflect_on_all_associations(:has_one))
+	        reflection_assoc.concat(class_name.reflect_on_all_associations(:has_many))
+	        reflection_assoc.compact!
 
             # Iterate through all associations
-	          reflection_assoc.each do |association|
-	            association_klass = association.klass
+	        reflection_assoc.each do |association|
+	          association_klass = association.klass
               # Is there a versioning table? If yes, go back to the beginning of the iteration..
-	            if association_klass.to_s.include?("version") then next end
-	            child_associations_has_one = association_klass.reflect_on_all_associations(:has_one)
-	            child_associations_has_many = association_klass.reflect_on_all_associations(:has_many)
+              if association_klass.to_s.include?("version") then next end
+	          child_associations_has_one = association_klass.reflect_on_all_associations(:has_one)
+	          child_associations_has_many = association_klass.reflect_on_all_associations(:has_many)
 
               # Does the associated table have further associated tables and did they already be iterated through?
-	            if (child_associations_has_one.empty? || child_associations_has_many.empty?) && associations[association_klass.versioned_class_name] != nil then next end
+	          if (child_associations_has_one.empty? || child_associations_has_many.empty?) && associations[association_klass.versioned_class_name] != nil then next end
 
-	            new_data_set = Array.new
+	          new_data_set = Array.new
               # Check if the table has been visited already. If yes, complete the data sets -> Does only happen if we have a table without associations.
-	            if associations[association_klass.versioned_class_name] != nil then new_data_set = associations[association_klass.versioned_class_name] end
+	          if associations[association_klass.versioned_class_name] != nil then new_data_set = associations[association_klass.versioned_class_name] end
 
               foreign_ids = []
               data_set.each { |data|
@@ -118,80 +118,79 @@ module ActiveRecord
               }
 
               unless foreign_ids.blank?
-	              tmp_new_data_set = association_klass.versioned_class.where(["#{class_name.to_s.tableize.singularize.downcase}_id IN (?)", foreign_ids]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at]} asc").all
-	              unless tmp_new_data_set.blank? then new_data_set.concat(tmp_new_data_set) end
+	            tmp_new_data_set = association_klass.versioned_class.where(["#{class_name.to_s.tableize.singularize.downcase}_id IN (?)", foreign_ids]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at]} asc").all
+	            unless tmp_new_data_set.blank? then new_data_set.concat(tmp_new_data_set) end
               end
 
               # Cache the found data sets into the result hash
-	            associations[association_klass.versioned_class_name] = new_data_set
+	          associations[association_klass.versioned_class_name] = new_data_set
               # Additionally found data sets get saved on the stack for the next iteration
-	            stack.push association_klass => new_data_set
-	          end
-	          #--
+	          stack.push association_klass => new_data_set
 	        end
+	      end
 
           # Remove all double entries
-	        associations.each do |class_name, versionArray|
-	          versionArray.uniq!
-	        end
-
-	        return associations
+          associations.each do |class_name_to_s, versionArray|
+	        versionArray.uniq!
 	      end
+
+	      return associations
+	    end
 
         private
 
         # This method overrides the default method "before_save" of the ActiveRecord class.
         # It is invoked before the actual saving takes place and serves to preparing the versioning.
-	      def b_s
-	        prepare_versioning
-	      end
+	    def b_s
+	      prepare_versioning
+	    end
 
         # This method overrides the default method "before_destroy" of the ActiveRecord class.
         # It is invoked before the actual destroying takes place and serves to preparing the versioning.
-	      def b_d
-	        prepare_versioning 2
-	      end
+	    def b_d
+	      prepare_versioning 2
+	    end
 
         # This method overrides the default method "after_save" of the ActiveRecord class.
         # It is invoked after the actual saving has token place and serves to execute the versioning.
-	      def a_s
-	        do_versioning
-	      end
+	    def a_s
+	      do_versioning
+	    end
 
         # This method overrides the default method "after_destroy" of the ActiveRecord class.
         # It is invoked after the actual destroying has token place and serves to execute the versioning.
-	      def a_d
-	        do_versioning
-	      end
+	    def a_d
+	      do_versioning
+	    end
 
         # This method is preparing the versioning. It copies the current object and saves it into a variable.
         # For the number it is assumed to be between 0 and 2 depending on the mode (0 = insert, 1 = update, 2 = delete).
-	      def prepare_versioning(mode = 0)
-	        @acts_as_versioner_mode = mode # mode : 0 = insert, 1 = update, 2 = delete
-	        @acts_as_versioner_model = self.dup
+	    def prepare_versioning(mode = 0)
+	      @acts_as_versioner_mode = mode # mode : 0 = insert, 1 = update, 2 = delete
+	      @acts_as_versioner_model = self.dup
           @acts_as_versioner_model.updated_at = Time.now
 
-	        if mode == 0 && self.id != nil then @acts_as_versioner_mode = 1 end  
-	      end
+	      if mode == 0 && self.id != nil then @acts_as_versioner_mode = 1 end  
+	    end
 
         # In this method the versioning is happening. It expects a copy of the current object in the variable @acts_as_versioner_mode.
         # It will be invoked after the method "prepare_versioning"
-	      def do_versioning
-	        attributes = Hash.new
+	    def do_versioning
+	      attributes = Hash.new
           # Save variables and the values in a hash
-	        @acts_as_versioner_model.attributes.each do |attribute, value|
-	          attributes[attribute] = value unless attribute == "id" # ID has to be excluded because MassAssignment warning...
-	        end
-
-	        @acts_as_versioner_model = nil
-
-	        attributes[self.versioned_foreign_key] = self.id
-	        attributes[:action] = @acts_as_versioner_mode
-
-	        modelversion = instance_eval(self.versioned_class_name).new(attributes)
-	        modelversion.save(:validate => false)
+	      @acts_as_versioner_model.attributes.each do |attribute, value|
+	        attributes[attribute] = value unless attribute == "id" # ID has to be excluded because MassAssignment warning...
 	      end
+
+	      @acts_as_versioner_model = nil
+
+	      attributes[self.versioned_foreign_key] = self.id
+	      attributes[:action] = @acts_as_versioner_mode
+
+	      modelversion = instance_eval(self.versioned_class_name).new(attributes)
+	      modelversion.save(:validate => false)
 	    end
+	  end
 
       module ActMethods
         def self.included(base) # :nodoc:
@@ -320,7 +319,7 @@ module ActiveRecord
         end
       end
 
-	  end
-	end
+    end
+  end
 end
 
