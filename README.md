@@ -18,10 +18,12 @@ table format:
 This gem expands a model class, marked with keyword "acts_as_versioner", with following methods:
 	
 	def get_current_version
-		Returns the current version.
+	  - Returns the current version, here e.g. Entry (table 'entries' and 'entry_versions')
+	  -> #<Entry::EntryVersion id: 5, entry_id: 2, action: 1, ..., created_by: [User.id], updated_by: [User.id], created_at: [DateTime], updated_at: [DateTime]>
 
     def get_versions
-		Returns all versions of a model.
+	  - Returns all versions of a model, here e.g. Entry (table 'entries' and 'entry_versions')
+	  -> [#<Entry::EntryVersion id: 1, entry_id: 1, action: 0,...>, #<Entry::EntryVersion id: 2, entry_id: 1, action: 1, ...>]
 
 Userstamp
 =========
@@ -38,19 +40,19 @@ app/controllers/application_controller
 protected
 
     def setcurrentuser
-		User.current_user = current_user.nil? ? nil : User.find(current_user.id)
-		yield
+	  User.current_user = current_user.nil? ? nil : User.find(current_user.id)
+	  yield
 	ensure
-		User.current_user = nil
+	  User.current_user = nil
 	end	
 
 app/models/user.rb
 ---
 
     def self.current_user
-		Thread.current[:current_user]
+	  Thread.current[:current_user]
 	end	
 	
     def self.current_user=(usr)
-		Thread.current[:current_user] = usr
+	  Thread.current[:current_user] = usr
 	end
