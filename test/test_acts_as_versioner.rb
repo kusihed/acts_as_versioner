@@ -16,19 +16,19 @@ class ActsAsVersionerTest < Minitest::Test
   
   def test_created_action
     first_entry = Entry.first
-    assert first_entry.get_versions.first.action, 0
+    assert first_entry.get_versions[0].action, 0
   end
   
   def test_updated_action
     first_entry = Entry.first
     first_entry.update_attributes(:name => "Werni")
-    assert first_entry.get_versions[1], 1
+    assert first_entry.get_versions[1].action, 1
   end  
   
   def test_destroyed_action
     first_entry = Entry.first
     first_entry.destroy
-    assert first_entry.get_versions[1], 2
+    assert first_entry.get_versions[1].action, 2
   end  
 
 end
