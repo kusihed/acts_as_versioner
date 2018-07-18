@@ -63,12 +63,12 @@ module ActiveRecord
 
         # Returns the current version.
 	    def get_current_version
-          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} desc, id desc").first
+          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} desc, id desc").first
 	    end
 
         # Returns all versions of a model.
 	    def get_versions
-          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, id asc").all
+          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, id asc").all
 	    end
 
         # This methods returns all versions of associated tables (table that belong to the existing model).
@@ -77,7 +77,7 @@ module ActiveRecord
 	      stack = Array.new # Stack of the same algorithm.
 
           # Initiate algorithm with the used model
-	      versions = instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at]} asc").all
+	      versions = instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at]} asc").all
 	      associations[self.versioned_class_name] = versions # Caching itself in the result hash
 	      stack.push self.class => versions # Setting itself onto the stack
 
@@ -118,7 +118,7 @@ module ActiveRecord
               }
 
               unless foreign_ids.blank?
-	            tmp_new_data_set = association_klass.versioned_class.where(["#{class_name.to_s.tableize.singularize.downcase}_id IN (?)", foreign_ids]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at]} asc").all
+	            tmp_new_data_set = association_klass.versioned_class.where(["#{class_name.to_s.tableize.singularize.downcase}_id IN (?)", foreign_ids]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at]} asc").all
 	            unless tmp_new_data_set.blank? then new_data_set.concat(tmp_new_data_set) end
               end
 
@@ -218,10 +218,10 @@ module ActiveRecord
             versioned_table_name = self.to_s.underscore + ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]
             puts table_name
             # create version column in main table if it does not exist
-            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_at], :datetime)
-            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_at], :datetime)
-            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versiond_created_by], :integer)
-            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versiond_updated_by], :integer)
+            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at], :datetime)
+            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at], :datetime)
+            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_by], :integer)
+            add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_by], :integer)
 
 
             # create versions table
