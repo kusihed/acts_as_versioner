@@ -25,8 +25,8 @@ module ActiveRecord
 
           send :attr_accessor
 
-          self.versioned_class_name         = options[:class_name]  || "#{base_class}Version"
-          self.versioned_table_name         = options[:table_name]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]}#{table_name_suffix}"
+          self.versioned_class_name         = options[:class_name]  || "#{base_class}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]}"
+          self.versioned_table_name         = options[:table_name]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_table_name]}#{table_name_suffix}"
           self.versioned_foreign_key        = options[:versioned_foreign_key]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}_id"   # quick 'n' dirty fix
 
           if block_given?
@@ -215,7 +215,7 @@ module ActiveRecord
 
           # Rake migration task to create the versioned table
           def create_versioned_table(create_table_options = {})
-            versioned_table_name = self.to_s.underscore + ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]
+            versioned_table_name = "#{self.to_s.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]}"
             puts table_name
             # create version column in main table if it does not exist
             add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at], :datetime)
