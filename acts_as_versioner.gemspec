@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = "acts_as_versioner"
-  s.version = "1.0.2"
+  s.version = "1.0.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Markus Hediger"]
-  s.date = "2018-01-01"
+  s.date = "2018-07-23"
   s.description = "Versioning of ar tables"
   s.email = "m.hed@gmx.ch"
   s.extra_rdoc_files = [
