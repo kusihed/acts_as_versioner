@@ -218,7 +218,7 @@ module ActiveRecord
 
           # Rake migration task to create the versioned table
           def create_versioned_table(create_table_options = {})
-            versioned_table_name = "#{self.to_s.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]}"
+            versioned_table_name = "#{self.to_s.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_table_name]}"
             puts table_name
             # create version column in main table if it does not exist
             add_column_to_table(table_name, ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at], :datetime)
