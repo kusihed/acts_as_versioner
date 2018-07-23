@@ -63,12 +63,12 @@ module ActiveRecord
 
         # Returns the current version.
 	    def get_current_version
-          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} desc, id desc").first
+          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order(Arel.sql("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} desc, id desc")).first
 	    end
 
         # Returns all versions of a model.
 	    def get_versions
-          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, id asc").all
+          instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order(Arel.sql("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, id asc")).all
 	    end
 
         # This methods returns all versions of associated tables (table that belong to the existing model).
@@ -77,7 +77,7 @@ module ActiveRecord
 	      stack = Array.new # Stack of the same algorithm.
 
           # Initiate algorithm with the used model
-	      versions = instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at]} asc").all
+	      versions = instance_eval(self.versioned_class_name).where([self.versioned_foreign_key + ' = ?', self.id]).order(Arel.sql("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at]} asc")).all
 	      associations[self.versioned_class_name] = versions # Caching itself in the result hash
 	      stack.push self.class => versions # Setting itself onto the stack
 
@@ -118,7 +118,7 @@ module ActiveRecord
               }
 
               unless foreign_ids.blank?
-	            tmp_new_data_set = association_klass.versioned_class.where(["#{class_name.to_s.tableize.singularize.downcase}_id IN (?)", foreign_ids]).order("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at]} asc").all
+	            tmp_new_data_set = association_klass.versioned_class.where(["#{class_name.to_s.tableize.singularize.downcase}_id IN (?)", foreign_ids]).order(Arel.sql("#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_updated_at]} asc, #{ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at]} asc")).all
 	            unless tmp_new_data_set.blank? then new_data_set.concat(tmp_new_data_set) end
               end
 
@@ -168,7 +168,7 @@ module ActiveRecord
 	    def prepare_versioning(mode = 0)
 	      @acts_as_versioner_mode = mode # mode : 0 = insert, 1 = update, 2 = delete
 	      @acts_as_versioner_model = self.dup
-          @acts_as_versioner_model.updated_at = Time.now
+        @acts_as_versioner_model.updated_at = Time.now
 
 	      if mode == 0 && self.id != nil then @acts_as_versioner_mode = 1 end  
 	    end
@@ -186,6 +186,9 @@ module ActiveRecord
 
 	      attributes[self.versioned_foreign_key] = self.id
 	      attributes[:action] = @acts_as_versioner_mode
+        
+        # Conserve the created_at field in the versions table
+        attributes[ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at].to_sym] = self[ActiveRecord::Acts::Versioner::configurator[:default_versioned_created_at].to_sym]
 
 	      modelversion = instance_eval(self.versioned_class_name).new(attributes)
 	      modelversion.save(:validate => false)
