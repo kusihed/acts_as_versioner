@@ -246,11 +246,9 @@ module ActiveRecord
           end
 
           def add_column_to_table(table, column, type)
-            tabelle = self.connection.execute("show columns from #{table} like '#{column}'")
-            
             do_add = true
-            for res in tabelle
-              do_add = false if column.to_s == res.first.to_s
+            self.columns.select { |c| c.name }.each do |col|
+              do_add = false if column.to_s == col.name.to_s
             end
             if do_add
               self.connection.add_column table, column, type
@@ -266,17 +264,27 @@ module ActiveRecord
           def adapt_versioned_table
             not_versioned =  ["id", "action", versioned_foreign_key.to_s]
             versioned_columns = []
-            self.connection.execute("show columns from #{versioned_table_name}").each { |col|
-              versioned_columns << [col[0], col[1]] unless not_versioned.include?(col[0])
-            }
+            
+            db_type = ActiveRecord::Base.configurations[Rails.env]["adapter"]
+            if db_type == "mysql2"
+              self.connection.execute("show columns from #{versioned_table_name}").each { |col|
+                versioned_columns << [col[0], col[1]] unless not_versioned.include?(col[0])
+              }
+            elsif db_type == "postgresql"
+              self.connection.execute("select column_name, data_type from information_schema.columns where table_name = '#{versioned_table_name}'").each { |col|
+                versioned_columns << [col["column_name"], col["data_type"]] unless not_versioned.include?(col["column_name"])
+              }
+            else
+              raise "This method doesn't support your database type ..."
+            end  
 
             missing = []
             changed = []
 
             reset_columns = []
-            self.connection.execute("show columns from #{table_name}").each { |col|
-              reset_columns << [col[0], col[1]] unless not_versioned.include?(col[0])
-            }
+            self.columns.each do |col|
+              reset_columns << [col.name, col.type] unless not_versioned.include?(col.name)
+            end
 
             reset_columns.each do |rc|
               found = versioned_columns.detect{ |wc| wc.first == rc.first }
