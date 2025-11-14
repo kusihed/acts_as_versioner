@@ -1,10 +1,10 @@
 Gem::Specification.new do |s|
   s.name = "acts_as_versioner"
-  s.version = "1.0.4"
+  s.version = "1.0.5"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Markus Hediger"]
-  s.date = "2018-07-23"
+  s.date = "2025-11-14"
   s.description = "Versioning of ar tables"
   s.email = "m.hed@gmx.ch"
   s.extra_rdoc_files = [
@@ -25,9 +25,9 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.summary = "Versioning of ar tables"
 
-  s.add_development_dependency "rails", "~> 5.0"
-  s.add_development_dependency "bundler", '~> 0'
-  s.add_development_dependency "rake", '~> 0'
-  s.add_development_dependency "sqlite3", '~> 0'
+  s.add_development_dependency "rails"
+  s.add_development_dependency "bundler"
+  s.add_development_dependency "rake"
+  s.add_development_dependency "sqlite3"
 end
 

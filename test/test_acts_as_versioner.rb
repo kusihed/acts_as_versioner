@@ -24,7 +24,7 @@ class ActsAsVersionerTest < Minitest::Test
   
   def test_updated_action
     first_entry = Entry.where(:name => "Heini").first
-    first_entry.update_attributes(:name => "Werni")
+    first_entry.update(:name => "Werni")
     assert first_entry.get_versions[1].entry_id, 1
     assert first_entry.get_versions[1].action, 1
   end  
@@ -38,7 +38,7 @@ class ActsAsVersionerTest < Minitest::Test
   
   def test_updated_action_entry_2
     second_entry = Entry.where(:name => "Susi").first
-    second_entry.update_attributes(:name => "Werni")
+    second_entry.update(:name => "Werni")
     assert second_entry.get_versions[1].entry_id, 2
     assert second_entry.get_versions[1].action, 1
   end  

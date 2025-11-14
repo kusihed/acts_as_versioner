@@ -25,9 +25,9 @@ module ActiveRecord
 
           send :attr_accessor
 
-          self.versioned_class_name         = options[:class_name]  || "#{base_class}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]}"
-          self.versioned_table_name         = options[:table_name]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_table_name]}#{table_name_suffix}"
-          self.versioned_foreign_key        = options[:versioned_foreign_key]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}_id"   # quick 'n' dirty fix
+          self.versioned_class_name = options[:class_name]  || "#{base_class}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_class_name]}"
+          self.versioned_table_name = options[:table_name]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}#{ActiveRecord::Acts::Versioner::configurator[:default_versioned_table_name]}#{table_name_suffix}"
+          self.versioned_foreign_key = options[:versioned_foreign_key]  || "#{table_name_prefix}#{base_class.name.demodulize.underscore}_id"   # quick 'n' dirty fix
 
           if block_given?
             extension_module_name = "#{versioned_class_name}Extension"
@@ -246,9 +246,15 @@ module ActiveRecord
           end
 
           def add_column_to_table(table, column, type)
+            tabelle = self.connection.columns(table).map do |col|
+              if col.name == column
+                [col.name, col.sql_type, col.null, col.default]
+              end
+            end
+            
             do_add = true
-            self.columns.select { |c| c.name }.each do |col|
-              do_add = false if column.to_s == col.name.to_s
+            for res in tabelle.compact
+              do_add = false if column.to_s == res.first.to_s
             end
             if do_add
               self.connection.add_column table, column, type
@@ -263,27 +269,28 @@ module ActiveRecord
           # If a column is added call this method to adapt the versioned table
           def adapt_versioned_table
             not_versioned =  ["id", "action", versioned_foreign_key.to_s]
+  
             versioned_columns = []
-            
-            db_type = ActiveRecord::Base.configurations[Rails.env]["adapter"]
-            if db_type == "mysql2"
-              self.connection.execute("show columns from #{versioned_table_name}").each { |col|
-                versioned_columns << [col[0], col[1]] unless not_versioned.include?(col[0])
-              }
-            elsif db_type == "postgresql"
-              self.connection.execute("select column_name, data_type from information_schema.columns where table_name = '#{versioned_table_name}'").each { |col|
-                versioned_columns << [col["column_name"], col["data_type"]] unless not_versioned.include?(col["column_name"])
-              }
-            else
-              raise "This method doesn't support your database type ..."
-            end  
+            tabelle = self.connection.columns("#{versioned_table_name}").map do |col|
+            	[
+           		  col.name, col.sql_type, col.null, col.default
+           	  ]
+            end
+            for res in tabelle
+            	versioned_columns << [res[0], res[1]] unless not_versioned.include?(res[0])
+            end	
 
             missing = []
             changed = []
 
             reset_columns = []
-            self.columns.each do |col|
-              reset_columns << [col.name, col.type] unless not_versioned.include?(col.name)
+            tabelle = self.connection.columns("#{table_name}").map do |col|
+            	[
+           		  col.name, col.sql_type, col.null, col.default
+           	  ]
+            end
+            for res in tabelle
+            	reset_columns << [res[0], res[1]] unless not_versioned.include?(res[0])
             end
 
             reset_columns.each do |rc|
