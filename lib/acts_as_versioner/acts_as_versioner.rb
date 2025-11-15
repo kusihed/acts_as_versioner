@@ -228,7 +228,7 @@ module ActiveRecord
 
 
             # create versions table
-            self.connection.create_table(versioned_table_name, create_table_options) do |t|
+            self.connection.create_table(versioned_table_name, **create_table_options) do |t|
                     t.column versioned_foreign_key, :integer
                     t.column :action, :integer, :null => false, :default => 0
             end
